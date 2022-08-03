@@ -32,7 +32,6 @@ init: venv
 	mv agent.yang ${APPNAME}/yang/${APPNAME}.yang
 	mv agent-config.yml ${APPNAME}.yml
 	mv dev.clab.yml lab/
-	mv myconfig.cli lab/
 	mv main.py run.sh ${APPNAME}/
 	mv base_agent.py ${APPNAME}/
 	mv greeter_agent.py ${APPNAME}/

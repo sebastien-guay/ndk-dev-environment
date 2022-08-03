@@ -11,4 +11,3 @@ topology:
         - "../{{ getenv "APPNAME" }}:/opt/{{ getenv "APPNAME" }}" # mount dir with agent code
         - "../logs/srl1:/var/log/srlinux" # expose srlinux logs to a dev machine
         - "../{{ getenv "APPNAME" }}.yml:/etc/opt/srlinux/appmgr/{{ getenv "APPNAME" }}.yml" # put agent config file to appmgr directory
-      startup-config: myconfig.cli
