@@ -5,11 +5,10 @@ import grpc
 
 from datetime import datetime
 
-from ndk import sdk_service_pb2
-from ndk import sdk_service_pb2_grpc
-
 import logging
 from logging.handlers import RotatingFileHandler
+
+from {{ getenv "APPNAME" }}_agent import {{ getenv "CLASSNAME" }}
 
 agent_name = "{{ getenv "APPNAME" }}"
 
@@ -25,11 +24,7 @@ if __name__ == "__main__":
     )
     logging.info("START TIME :: {}".format(datetime.now()))
 
-    channel = grpc.insecure_channel("127.0.0.1:50053")
-    metadata = [("agent_name", agent_name)]
-    sdk_mgr_client = sdk_service_pb2_grpc.SdkMgrServiceStub(channel)
+    with {{ getenv "CLASSNAME" }}(name = agent_name) as agent:
+        agent.run()
 
-    response = sdk_mgr_client.AgentRegister(
-        request=sdk_service_pb2.AgentRegistrationRequest(), metadata=metadata
-    )
-    logging.info(f"Agent succesfully registered! App ID: {response.app_id}")
+    logging.info("STOP TIME :: {}".format(datetime.now()))

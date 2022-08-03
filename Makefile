@@ -7,8 +7,8 @@
 # - containerlab
 #################
 
-APPNAME = demo-app
-GOPKGNAME= demo-app
+APPNAME = greeter
+CLASSNAME = Greeter
 
 LABFILE = dev.clab.yml
 BIN_DIR = $$(pwd)/build
@@ -25,16 +25,18 @@ ifdef cleanup
 endif
 
 init: venv
-	mkdir -p logs/srl1 logs/srl2 build lab $(APPNAME) $(APPNAME)/yang $(APPNAME)/wheels
+	mkdir -p logs/srl1 build lab $(APPNAME) $(APPNAME)/yang $(APPNAME)/wheels
 	
-	docker run --rm -e APPNAME=${APPNAME} -v $$(pwd):/tmp hairyhenderson/gomplate:stable --input-dir /tmp/.gen --output-map='/tmp/{{ .in | strings.TrimSuffix ".tpl" }}'
+	docker run --rm -e APPNAME=${APPNAME} -e CLASSNAME=${CLASSNAME} -v $$(pwd):/tmp hairyhenderson/gomplate:stable --input-dir /tmp/.gen --output-map='/tmp/{{ .in | strings.TrimSuffix ".tpl" }}'
 	sudo chown -R $$(id -u):$$(id -g) .
 	mv agent.yang ${APPNAME}/yang/${APPNAME}.yang
 	mv agent-config.yml ${APPNAME}.yml
 	mv dev.clab.yml lab/
+	mv myconfig.cli lab/
 	mv main.py run.sh ${APPNAME}/
-
-	sed -i 's/demo-app/${APPNAME}/g' Makefile
+	mv base_agent.py ${APPNAME}/
+	mv greeter_agent.py ${APPNAME}/
+	sed -i 's/${APPNAME}/${APPNAME}/g' Makefile
 	cp .gen/.gitignore .
 
 venv:
@@ -49,7 +51,7 @@ venv:
 wheels:
 	docker run --rm -v $$(pwd):/work -w /work --entrypoint 'bash' ghcr.io/nokia/srlinux:latest -c "sudo python3 -m pip install -U pip wheel && sudo pip3 wheel pip wheel -r requirements.txt --no-cache --wheel-dir $(APPNAME)/wheels"
 
-# setting up venv on srl1/srl2 containers
+# setting up venv on srl1 containers
 remote-venv: wheels
 	cd lab; \
 	sudo clab exec -t $(LABFILE) --label clab-node-kind=srl --cmd "bash -c \"sudo python3 -m venv /opt/${APPNAME}/.venv \
@@ -63,7 +65,7 @@ destroy-lab:
 	sudo rm -rf ../logs/*
 
 deploy-lab:
-	mkdir -p logs/srl1 logs/srl2
+	mkdir -p logs/srl1
 	cd lab; \
 	sudo clab dep -t $(LABFILE)
 

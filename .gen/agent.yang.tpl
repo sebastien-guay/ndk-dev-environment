@@ -10,8 +10,12 @@ module {{ getenv "APPNAME" }} {
     }
 
     container {{ getenv "APPNAME" }} {
-        leaf test {
+        leaf name {
             type string;
+        }
+        leaf uptime {
+            type string;
+            config false;
         }
     }
 }
