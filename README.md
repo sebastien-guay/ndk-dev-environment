@@ -4,9 +4,9 @@ This repo provides a base agent, the Greeter app and a Makefile for setting up a
 ### Features
 The Greeter app demonstrates how agent can interact with the whole state and config tree of SR Linux using local gNMI access and the NDK.
 - It subscribes to configuration using the NDK.
-- It retrieves the "name" from the configuration notification and update the uptime status with a harcoded value of 8:00 using the telemetry.
+- It retrieves the "name" from the configuration notification and update the uptime status with a harcoded value of 8:00 using a telemetry client.
 - It gets the uptime using gNMI. The gNMI client is locally connecting using Unix Domain Socket.
-- It logs "Hello <name>, my uptime is <uptime>"​. 
+- It logs "Hello myname, my uptime is 8:00"​. 
 
 ### Quickstart
 Clone the `greeter-app-python` branch.
@@ -25,7 +25,7 @@ Build the lab and deploy the demo application:
 make redeploy-all
 ```
 
-The app named `greeter` is now running on `srl1` and you can explore the logs of the app by reading the log file:
+The app named `greeter` is now running on `srl1`. The 'name' configuration parameter defined in the YANG model is available and you can explore the logs of the app by reading the log file:
 
 ```
 tail -f logs/srl1/stdout/greeter.log
