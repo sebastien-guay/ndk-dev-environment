@@ -9,7 +9,6 @@ from pygnmi.client import gNMIclient
 
 from ndk import sdk_service_pb2
 from ndk import config_service_pb2
-from ndk import telemetry_service_pb2
 
 class Greeter(BaseAgent):
     def __init__(self, name):
@@ -36,9 +35,9 @@ class Greeter(BaseAgent):
         name = data["name"]["value"] if "name" in data else ""
         return name
     
-    def _set_up_time(self):
-        up_time = "8:00"
-        telemetry_data = {"uptime": up_time}
+    def _set_uptime(self):
+        uptime = "8:00"
+        telemetry_data = {"uptime": uptime}
         self._update_telemetry(f".{self.name}", telemetry_data)
 
     def _handle_notification(self, obj):        
@@ -48,9 +47,9 @@ class Greeter(BaseAgent):
             if name == "":
                logging.info("greeter/name not configured") 
             else:
-                self._set_up_time()
+                self._set_uptime()
                 up_time_from_gnmi = self._get_uptime_from_state()
-                logging.info(f"hello {name}, my uptime is {json.dumps(up_time_from_gnmi)}")
+                logging.info(f"Hello {name}, my uptime is {json.dumps(up_time_from_gnmi)}")
     
     def _get_uptime_from_state(self) -> str:
         uptime = ""        
@@ -58,15 +57,6 @@ class Greeter(BaseAgent):
             response = client.get(path=['/greeter/uptime'], encoding='json_ietf')
             uptime =  response['notification'][0]['update'][0]['val']
         return uptime
- 
-    def _update_telemetry(self, js_opath, data):
-        telemetry_update_request = telemetry_service_pb2.TelemetryUpdateRequest()
-
-        telemetry_info = telemetry_update_request.state.add()
-        telemetry_info.key.js_path = js_opath
-        telemetry_info.data.json_content = json.dumps(data)
-        telemetry_response = self.sdk_telemetry_client.TelemetryAddOrUpdate(request=telemetry_update_request, metadata=self.metadata)
-        logging.info(f"Telemetry update result: {telemetry_response.status} String: {telemetry_response.error_str}")
 
     def run(self):
         try:                
@@ -79,8 +69,7 @@ class Greeter(BaseAgent):
                 for obj in r.notification:
                     if obj.HasField("config") and obj.config.key.js_path == ".commit.end":
                         logging.info("TO DO -commit.end config")
-                    else:
-                        logging.info("call notification callback")                       
+                    else:                  
                         self._handle_notification(obj)
         except SystemExit as e:
             logging.info("Handling SystemExit")          

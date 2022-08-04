@@ -5,10 +5,12 @@ import grpc
 import sys
 import logging
 import signal
+import json
 
 from ndk import sdk_service_pb2
 from ndk import sdk_service_pb2_grpc
 from ndk import telemetry_service_pb2_grpc
+from ndk import telemetry_service_pb2
 
 class BaseAgent(object):
     def __init__(self, name):
@@ -57,3 +59,12 @@ class BaseAgent(object):
     
     def run(self):
         logging.warning("Run() function not implemented")
+    
+    def _update_telemetry(self, js_opath, data):
+        telemetry_update_request = telemetry_service_pb2.TelemetryUpdateRequest()
+
+        telemetry_info = telemetry_update_request.state.add()
+        telemetry_info.key.js_path = js_opath
+        telemetry_info.data.json_content = json.dumps(data)
+        telemetry_response = self.sdk_telemetry_client.TelemetryAddOrUpdate(request=telemetry_update_request, metadata=self.metadata)
+        logging.info(f"Telemetry update result: {telemetry_response.status} String: {telemetry_response.error_str}")
