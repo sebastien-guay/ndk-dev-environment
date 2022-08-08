@@ -25,7 +25,7 @@ ifdef cleanup
 endif
 
 init: venv
-	mkdir -p logs/srl1 build lab $(APPNAME) $(APPNAME)/yang $(APPNAME)/wheels
+	mkdir -p logs/srl1 logs/srl2 build lab $(APPNAME) $(APPNAME)/yang $(APPNAME)/wheels
 	
 	docker run --rm -e APPNAME=${APPNAME} -e CLASSNAME=${CLASSNAME} -v $$(pwd):/tmp hairyhenderson/gomplate:stable --input-dir /tmp/.gen --output-map='/tmp/{{ .in | strings.TrimSuffix ".tpl" }}'
 	sudo chown -R $$(id -u):$$(id -g) .
@@ -50,7 +50,7 @@ venv:
 wheels:
 	docker run --rm -v $$(pwd):/work -w /work --entrypoint 'bash' ghcr.io/nokia/srlinux:latest -c "sudo python3 -m pip install -U pip wheel && sudo pip3 wheel pip wheel -r requirements.txt --no-cache --wheel-dir $(APPNAME)/wheels"
 
-# setting up venv on srl1 containers
+# setting up venv on srl1/srl2 containers
 remote-venv: wheels
 	cd lab; \
 	sudo clab exec -t $(LABFILE) --label clab-node-kind=srl --cmd "bash -c \"sudo python3 -m venv /opt/${APPNAME}/.venv \
@@ -64,7 +64,7 @@ destroy-lab:
 	sudo rm -rf ../logs/*
 
 deploy-lab:
-	mkdir -p logs/srl1
+	mkdir -p logs/srl1 logs/srl2
 	cd lab; \
 	sudo clab dep -t $(LABFILE)
 

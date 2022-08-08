@@ -47,14 +47,14 @@ class BaseAgent(object):
         self.channel.close()
 
     def _handle_sigterm(self, *arg):
-        logging.info(f"Handle SIGTERM")
+        logging.info("Handle SIGTERM")
         sys.exit()
     def _handle_sighup(self, *arg):
-        logging.info(f"Handle SIGHUP")
+        logging.info("Handle SIGHUP")
         logging.info("Reload config not implemented")     
     
     def _handle_sigquit(self, *arg):
-        logging.info(f"Handle SIGQUIT")
+        logging.info("Handle SIGQUIT")
         logging.info("Stop and dump not implemented")
     
     def run(self):
