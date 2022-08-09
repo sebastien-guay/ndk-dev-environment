@@ -68,11 +68,11 @@ deploy-lab:
 	cd lab; \
 	sudo clab dep -t $(LABFILE)
 
-redeploy-lab: destroy-lab deploy-lab create-app-symlink
+redeploy-lab: destroy-lab deploy-lab create-app-symlink update-appmgr-dir restart-appmgr
 
 deploy-all: redeploy-all
 
-redeploy-all: redeploy-lab remote-venv create-app-symlink restart-app
+redeploy-all: redeploy-lab remote-venv create-app-symlink update-appmgr-dir restart-appmgr restart-app
 
 # lint an app and restart app_mgr without redeploying the lab
 lint-restart: lint restart-app
@@ -96,6 +96,14 @@ restart-app:
 create-app-symlink:
 	cd lab; \
 	sudo clab exec -t $(LABFILE) --label clab-node-kind=srl --cmd 'sudo ln -s /opt/$(APPNAME)/run.sh /usr/local/bin/$(APPNAME)'
+
+update-appmgr-dir:
+	cd lab; \
+	sudo clab exec -t $(LABFILE) --label clab-node-kind=srl --cmd 'sudo bash -c "mkdir -p /etc/opt/srlinux/appmgr && cp /tmp/$(APPNAME).yml /etc/opt/srlinux/appmgr/$(APPNAME).yml"'
+
+restart-appmgr:
+	cd lab; \	
+	sudo clab exec -t $(LABFILE) --label clab-node-kind=srl --cmd 'sr_cli "tools system app-management application app_mgr reload"'
 
 rpm:
 	docker run --rm -v $$(pwd):/tmp -w /tmp goreleaser/nfpm package \
