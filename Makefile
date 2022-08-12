@@ -11,6 +11,7 @@ APPNAME = greeter
 CLASSNAME = Greeter
 
 LABFILE = dev.clab.yml
+TESTLABFILE = test.clab.yml
 BIN_DIR = $$(pwd)/build
 BINARY = $$(pwd)/build/$(APPNAME)
 
@@ -32,9 +33,10 @@ init: venv
 	mv agent.yang ${APPNAME}/yang/${APPNAME}.yang
 	mv agent-config.yml ${APPNAME}.yml
 	mv dev.clab.yml lab/
+	mv test.clab.yml tests/lab
 	mv main.py run.sh ${APPNAME}/
 	mv base_agent.py ${APPNAME}/
-	mv greeter_agent.py ${APPNAME}/
+	mv ${APPNAME}_agent.py ${APPNAME}/
 	sed -i 's/${APPNAME}/${APPNAME}/g' Makefile
 	cp .gen/.gitignore .
 
@@ -114,6 +116,18 @@ rpm:
 	--config /tmp/nfpm.yml \
 	--target /tmp/build \
 	--packager rpm
+
+build-automated-test:
+	cd tests;\ 
+	docker build -t ${APPNAME}-tests .
+
+deploy-test-lab:
+	cd tests/lab;\
+	sudo clab dep -t $(TESTLABFILE)
+
+test:
+	docker exec -ti clab-${APPNAME}-test-test1 robot -b/mnt/debug.txt test.robot
+
 
 clean: destroy-lab remove-files .gitignore
 
