@@ -45,3 +45,17 @@ Commit the change:
 commit now
 ```
 The greeter agent logs will show this: "hello myname, my uptime is 8:00"
+
+## App Deployment
+Build a rpm file to deploy the app on hardware or vm by running this command:
+ ```console
+make build-app
+```
+The rpm file is located in /build. Copy the rpm on the SR Linux host and run:
+```console
+sudo rpm -U myrpm.rpm
+```
+The app is deployed and the last step is to reload the app-mgr by running this command in the SR Linux CLI:
+```console
+tools system app-management application app_mgr reload
+```

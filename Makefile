@@ -56,7 +56,6 @@ remote-venv: wheels
 	sudo clab exec -t $(LABFILE) --label clab-node-kind=srl --cmd "bash -c \"sudo python3 -m venv /opt/${APPNAME}/.venv \
 && source /opt/${APPNAME}/.venv/bin/activate && pip3 install --no-cache --no-index /opt/${APPNAME}/wheels/pip* && pip3 install --no-cache --no-index /opt/${APPNAME}/wheels/*\""
 
-
 destroy-lab:
 	cd lab; \
 	sudo clab des -t $(LABFILE) $(CLEANUP); \
@@ -68,11 +67,13 @@ deploy-lab:
 	cd lab; \
 	sudo clab dep -t $(LABFILE)
 
-redeploy-lab: destroy-lab deploy-lab create-app-symlink update-appmgr-dir restart-appmgr
+redeploy-lab: destroy-lab deploy-lab
 
 deploy-all: redeploy-all
 
-redeploy-all: redeploy-lab remote-venv create-app-symlink update-appmgr-dir restart-appmgr restart-app
+redeploy-all: redeploy-lab deploy_app
+
+deploy_app: remote-venv update-appmgr-dir restart-app_mgr 
 
 # lint an app and restart app_mgr without redeploying the lab
 lint-restart: lint restart-app
@@ -85,25 +86,28 @@ reload-app_mgr:
 	cd lab; \
 	sudo clab exec -t $(LABFILE) --label clab-node-kind=srl --cmd 'sr_cli "tools system app-management application app_mgr reload"'
 
-# use rebuild-app when new dependencies are introduced
+# use update-app when new dependencies are introduced
 # and you need to re-create the venv
-rebuild-app: venv remote-venv restart-app
+update-app: venv remote-venv restart-app
 
 restart-app:
 	cd lab; \
 	sudo clab exec -t $(LABFILE) --label clab-node-kind=srl --cmd 'sr_cli "tools system app-management application $(APPNAME) restart"'
 
-create-app-symlink:
-	cd lab; \
-	sudo clab exec -t $(LABFILE) --label clab-node-kind=srl --cmd 'sudo ln -s /opt/$(APPNAME)/run.sh /usr/local/bin/$(APPNAME)'
-
 update-appmgr-dir:
 	cd lab; \
 	sudo clab exec -t $(LABFILE) --label clab-node-kind=srl --cmd 'sudo bash -c "mkdir -p /etc/opt/srlinux/appmgr && cp /tmp/$(APPNAME).yml /etc/opt/srlinux/appmgr/$(APPNAME).yml"'
 
-restart-appmgr:
+restart-app_mgr:
 	cd lab; \	
 	sudo clab exec -t $(LABFILE) --label clab-node-kind=srl --cmd 'sr_cli "tools system app-management application app_mgr reload"'
+
+#Generate the venv used in the rpm
+build-venv: wheels
+	cd ${APPNAME}; \
+	docker run --rm -v $$(pwd):/opt/${APPNAME} -w /opt/${APPNAME} --entrypoint 'bash' ghcr.io/nokia/srlinux:latest -c "sudo python3 -m venv .venv && source .venv/bin/activate && pip3 install --no-cache --no-index wheels/pip* && pip3 install --no-cache --no-index wheels/*"
+
+build-app: build-venv rpm
 
 rpm:
 	docker run --rm -v $$(pwd):/tmp -w /tmp goreleaser/nfpm package \

@@ -1,7 +1,7 @@
 # {{ getenv "APPNAME" }} agent configuration file
 {{ getenv "APPNAME" }}:
-  path: /usr/local/bin
-  launch-command: /usr/local/bin/{{ getenv "APPNAME" }}
+  path: /opt/{{ getenv "APPNAME" }}
+  launch-command: /opt/{{ getenv "APPNAME" }}/run.sh
   search-command: python3 /opt/{{ getenv "APPNAME" }}/main.py
   yang-modules:
     names: ["{{ getenv "APPNAME" }}"]
