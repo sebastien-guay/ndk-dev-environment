@@ -137,11 +137,11 @@ redeploy_all_and_test: redeploy-all redeploy-test-lab
 test:
 	docker exec -ti clab-${APPNAME}-test-test1 robot -b/mnt/debug.txt test.robot
 
-clean: destroy-lab remove-files .gitignore
+clean: destroy-lab destroy-test-lab remove-files .gitignore
 
 remove-files:
 	cd tests; \
-	bash -O extglob -c 'sudo rm !(Dockerfile|requirements.txt)'; \
+	bash -O extglob -c 'sudo rm -r !(Dockerfile|requirements.txt)'; \
 	cd ..; \
 	sudo rm -rf logs build ${APPNAME} lab yang *.yml .venv *.py .gitignore wheels
 
