@@ -9,6 +9,8 @@ The Greeter app demonstrates how agent can interact with the whole state and con
 - It logs "Hello myname, my uptime is 8:00"​. 
 
 ## Quickstart
+You need [conatinerlab](https://containerlab.dev/install/) to be installed. Minimum version is v0.31.0 to have Unix domain socket enabled. 
+
 Clone the `greeter-app-python` branch.
 
 Initialize the NDK project:
@@ -58,4 +60,23 @@ sudo rpm -U myrpm.rpm
 The app is deployed and the last step is to reload the app-mgr by running this command in the SR Linux CLI:
 ```console
 tools system app-management application app_mgr reload
+```
+
+## Test using Robot Framework
+[Robot Framework](https://robotframework.org/) can be used to test the agent by running those commands:
+### Build Robot Framework docker image
+```console
+make build-automated-test
+```
+### Test with dev lab already deployed
+```console
+make deploy-test-lab
+```
+```console
+make test
+```
+
+### Test by deploying dev and test labs
+```console
+make redeploy_all_and_test
 ```
