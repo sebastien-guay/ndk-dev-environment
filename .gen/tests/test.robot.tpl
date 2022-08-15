@@ -22,7 +22,29 @@ Agent Should Run
     ${result}=              get_agent_status
     Should Be Equal         ${result}   running
 
+Agent Should Not Run
+    ${result}=              get_agent_status
+    Should Not Be Equal     ${result}   running
 
 *** Test Cases ***
 Test agent running
-    Agent Should Run
+    Wait Until Keyword Succeeds     30x     1s  
+    ...    Agent Should Run
+
+Test agent stop
+    stop_agent
+    Wait Until Keyword Succeeds     30x     1s  
+    ...    Agent Should Not Run
+    Sleep   5
+
+Test agent start
+    start_agent
+    Wait Until Keyword Succeeds     30x     1s  
+    ...    Agent Should Run
+    Sleep   5
+
+Test set name and check uptime
+    set_name
+    Sleep           5
+    ${result}=      check_uptime
+    Should be Equal     ${result}   8:00

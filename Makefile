@@ -131,7 +131,10 @@ destroy-test-lab:
 
 redeploy-test-lab: destroy-test-lab deploy-test-lab
 
-test: redeploy-all redeploy-test-lab
+redeploy_all_and_test: redeploy-all redeploy-test-lab
+	docker exec -ti clab-${APPNAME}-test-test1 robot -b/mnt/debug.txt test.robot
+
+test:
 	docker exec -ti clab-${APPNAME}-test-test1 robot -b/mnt/debug.txt test.robot
 
 clean: destroy-lab remove-files .gitignore
