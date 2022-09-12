@@ -1,4 +1,5 @@
 from pygnmi.client import gNMIclient
+from robot.api.deco import keyword
 
 host = ("clab-{{ getenv "APPNAME" }}-dev-srl1", 57400)
 cert = "/ca/srl1/srl1.pem"
@@ -16,15 +17,18 @@ class srl:
             path_cert=cert,
         )
         self.gc.__enter__()
-
+    
+    @keyword("Start Agent")
     def start_agent(self):
         m = [("/tools/system/app-management/application[name={{ getenv "APPNAME" }}]", {"start": ""})]
         self.gc.set(update=m, encoding=enc)
-
+    
+    @keyword("Stop Agent")
     def stop_agent(self):
         m = [("/tools/system/app-management/application[name={{ getenv "APPNAME" }}]", {"stop": ""})]
         self.gc.set(update=m, encoding=enc)
 
+    @keyword("Get Agent Status")
     def get_agent_status(self):
         result = self.gc.get(
             path=["/system/app-management/application[name={{ getenv "APPNAME" }}]/state"],
@@ -32,11 +36,13 @@ class srl:
         )
         return result["notification"][0]["update"][0]["val"]
 
+    @keyword("Set Agent Name")
     def set_name(self):
         m = [("/{{ getenv "APPNAME" }}", {"name": "seb"})]
         self.gc.set(update=m, encoding=enc)
 
-    def check_uptime(self):
+    @keyword("Get Uptime")
+    def get_uptime(self):
         result = self.gc.get(path=["/{{ getenv "APPNAME" }}/uptime"], encoding=enc)
         print(f"result is: {result}")
         # return True

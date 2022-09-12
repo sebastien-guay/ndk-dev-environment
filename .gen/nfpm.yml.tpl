@@ -11,3 +11,7 @@ contents: # contents to add to the package
 
   - src: "./{{ getenv "APPNAME" }}.yml" # local path of agent yml
     dst: "/etc/opt/srlinux/appmgr/{{ getenv "APPNAME" }}.yml" # destination path of agent yml
+
+  - src: "/opt/{{ getenv "APPNAME" }}/run.sh"
+    dst: "/usr/local/bin/{{ getenv "APPNAME" }}"
+    type: "symlink"

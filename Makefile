@@ -75,7 +75,7 @@ deploy-all: redeploy-all
 
 redeploy-all: redeploy-lab deploy_app
 
-deploy_app: remote-venv update-appmgr-dir restart-app_mgr 
+deploy_app: remote-venv create-app-symlink install-agent-config-file restart-app_mgr 
 
 # lint an app and restart app_mgr without redeploying the lab
 lint-restart: lint restart-app
@@ -96,7 +96,11 @@ restart-app:
 	cd lab; \
 	sudo clab exec -t $(LABFILE) --label clab-node-kind=srl --cmd 'sr_cli "tools system app-management application $(APPNAME) restart"'
 
-update-appmgr-dir:
+create-app-symlink:
+	cd lab; \
+	sudo clab exec -t $(LABFILE) --label clab-node-kind=srl --cmd 'sudo ln -s /opt/$(APPNAME)/run.sh /usr/local/bin/$(APPNAME)'
+
+install-agent-config-file:
 	cd lab; \
 	sudo clab exec -t $(LABFILE) --label clab-node-kind=srl --cmd 'sudo bash -c "mkdir -p /etc/opt/srlinux/appmgr && cp /tmp/$(APPNAME).yml /etc/opt/srlinux/appmgr/$(APPNAME).yml"'
 
