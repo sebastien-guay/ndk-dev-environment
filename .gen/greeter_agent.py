@@ -35,9 +35,8 @@ class Greeter(BaseAgent):
         name = data["name"]["value"] if "name" in data else ""
         return name
     
-    def _set_uptime(self):
-        uptime = "8:00"
-        telemetry_data = {"uptime": uptime}
+    def _set_greeting(self, greeting: str):
+        telemetry_data = {"greeting": greeting}
         self._update_telemetry(f".{self.name}", telemetry_data)
 
     def _handle_notification(self, obj):        
@@ -47,16 +46,18 @@ class Greeter(BaseAgent):
             if name == "":
                logging.info("greeter/name not configured") 
             else:
-                self._set_uptime()
-                up_time_from_gnmi = self._get_uptime_from_state()
-                logging.info(f"Hello {name}, my uptime is {json.dumps(up_time_from_gnmi)}")
+                last_booted = self._get_last_booted()
+                greeting = f"Hello {name}, my uptime is {last_booted}"
+                self._set_greeting(greeting)
+                logging.info(greeting)
+                
     
-    def _get_uptime_from_state(self) -> str:
-        uptime = ""        
+    def _get_last_booted(self) -> str:
+        last_booted = ""        
         with gNMIclient(target=("unix:///opt/srlinux/var/run/sr_gnmi_server", 57400), username="admin", password="admin", insecure=True) as client:
-            response = client.get(path=['/greeter/uptime'], encoding='json_ietf')
-            uptime =  response['notification'][0]['update'][0]['val']
-        return uptime
+            response = client.get(path=['/system/information/last-booted'], encoding='json_ietf')
+            last_booted =  response['notification'][0]['update'][0]['val']
+        return last_booted
 
     def run(self):
         try:                

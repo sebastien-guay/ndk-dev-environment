@@ -37,13 +37,13 @@ class srl:
         return result["notification"][0]["update"][0]["val"]
 
     @keyword("Set Agent Name")
-    def set_name(self):
-        m = [("/{{ getenv "APPNAME" }}", {"name": "seb"})]
+    def set_name(self, name):
+        m = [("/{{ getenv "APPNAME" }}", {"name":f"{name}"})]
         self.gc.set(update=m, encoding=enc)
 
-    @keyword("Get Uptime")
-    def get_uptime(self):
-        result = self.gc.get(path=["/{{ getenv "APPNAME" }}/uptime"], encoding=enc)
+    @keyword("Get Greeting")
+    def get_greeting(self):
+        result = self.gc.get(path=["/{{ getenv "APPNAME" }}/greeting"], encoding=enc)
         print(f"result is: {result}")
         # return True
         return result["notification"][0]["update"][0]["val"]

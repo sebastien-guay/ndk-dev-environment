@@ -4,10 +4,8 @@ This repo provides a base agent, the Greeter app and a Makefile for setting up a
 ## Features
 The Greeter app demonstrates how agent can interact with the whole state and config tree of SR Linux using local gNMI access and the NDK.
 - It subscribes to configuration using the NDK.
-- It retrieves the "name" from the configuration notification and update the uptime status with a hardcoded value of 8:00 using a telemetry client.
-- It gets the uptime using gNMI. The gNMI client is locally connecting using Unix Domain Socket.
-- It logs "Hello myname, my uptime is 8:00"​. 
-
+- It retrieves the `name` from the configuration notification and updates its own state with the greeting string `Hello {name}, my uptime is {last_booted}` where `last_booted` is retrieved from the `/system/information/last-booted` state datastore using gnmi.
+  
 ## Quickstart
 You need [conatinerlab](https://containerlab.dev/install/) to be installed. Minimum version is v0.31.0 to have Unix domain socket enabled. 
 
@@ -40,14 +38,12 @@ enter candidate private
 ```
 Change the configuration:
 ```console
-set greeter name myname
+set greeter name agent007
 ```
 Commit the change:
 ```console
 commit now
 ```
-The greeter agent logs will show this: "hello myname, my uptime is 8:00"
-
 ## App Deployment
 Build a rpm file to deploy the app on hardware or vm by running this command:
  ```console

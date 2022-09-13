@@ -21,11 +21,12 @@ Test agent start
     ...    Agent Should Run
     Sleep    5
 
-Test set name and check uptime
-    Set Agent Name
+Test set name and check greeting
+    ${name}    Set Variable    agent007
+    Set Agent Name    ${name}
     Sleep    5
-    ${result}=    Get Uptime
-    Should be Equal    ${result}    8:00
+    ${result}=    Get Greeting
+    Should Contain    ${result}    Hello ${name}, my uptime is  
 
 *** Keywords ***
 

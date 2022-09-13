@@ -13,7 +13,7 @@ module {{ getenv "APPNAME" }} {
         leaf name {
             type string;
         }
-        leaf uptime {
+        leaf greeting {
             type string;
             config false;
         }
