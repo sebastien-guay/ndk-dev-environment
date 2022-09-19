@@ -12,8 +12,6 @@ CLASSNAME = Greeter
 
 LABFILE = dev.clab.yml
 TESTLABFILE = test.clab.yml
-BIN_DIR = $$(pwd)/build
-BINARY = $$(pwd)/build/$(APPNAME)
 
 # abs path of a dir that hosts makefile
 ROOT_DIR:=$(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
@@ -36,8 +34,9 @@ init: venv
 	mv tests/$(TESTLABFILE) tests/lab
 	mv main.py run.sh ${APPNAME}/
 	mv base_agent.py ${APPNAME}/
-	mv ${APPNAME}_agent.py ${APPNAME}/
-	sed -i 's/${APPNAME}/${APPNAME}/g' Makefile
+	mv greeter_agent.py ${APPNAME}/${APPNAME}_agent.py
+	sed -i 's/^APPNAME =.*$$/APPNAME = ${APPNAME}/g' Makefile
+	sed -i 's/^CLASSNAME =.*$$/CLASSNAME = ${CLASSNAME}/g' Makefile
 	cp .gen/.gitignore .
 
 venv:
@@ -113,9 +112,7 @@ build-venv: wheels
 	cd ${APPNAME}; \
 	docker run --rm -v $$(pwd):/opt/${APPNAME} -w /opt/${APPNAME} --entrypoint 'bash' ghcr.io/nokia/srlinux:latest -c "sudo python3 -m venv .venv && source .venv/bin/activate && pip3 install --no-cache --no-index wheels/pip* && pip3 install --no-cache --no-index wheels/*"
 
-build-app: build-venv rpm
-
-rpm:
+rpm: build-venv
 	docker run --rm -v $$(pwd):/tmp -w /tmp goreleaser/nfpm package \
 	--config /tmp/nfpm.yml \
 	--target /tmp/build \
@@ -135,14 +132,16 @@ destroy-test-lab:
 
 redeploy-test-lab: destroy-test-lab deploy-test-lab
 
-redeploy_all_and_test: redeploy-all redeploy-test-lab
-	docker exec -ti clab-${APPNAME}-test-test1 robot -b/mnt/debug.txt test.robot
+redeploy_all_and_test: build-automated-test redeploy-all redeploy-test-lab test
 
 test:
 	docker exec -ti clab-${APPNAME}-test-test1 robot -b/mnt/debug.txt test.robot
 
 clean: destroy-lab destroy-test-lab remove-files .gitignore
-
+	# use default app name after clean
+	sed -i 's/^APPNAME =.*$$/APPNAME = greeter/g' Makefile
+	sed -i 's/^CLASSNAME =.*$$/CLASSNAME = Greeter/g' Makefile
+	
 remove-files:
 	cd tests; \
 	bash -O extglob -c 'sudo rm -r !(Dockerfile|requirements.txt)'; \

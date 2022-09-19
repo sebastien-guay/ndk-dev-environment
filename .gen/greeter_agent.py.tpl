@@ -10,7 +10,7 @@ from pygnmi.client import gNMIclient
 from ndk import sdk_service_pb2
 from ndk import config_service_pb2
 
-class Greeter(BaseAgent):
+class {{ getenv "CLASSNAME" }}(BaseAgent):
     def __init__(self, name):
         super().__init__(name)
 
@@ -44,7 +44,7 @@ class Greeter(BaseAgent):
         if obj.config.key.js_path == f".{self.name}":
             name = self._get_name_from_configuration(obj)
             if name == "":
-               logging.info("greeter/name not configured") 
+               logging.info("{{ getenv "APPNAME" }}/name not configured") 
             else:
                 last_booted = self._get_last_booted()
                 greeting = f"Hello {name}, my uptime is {last_booted}"
