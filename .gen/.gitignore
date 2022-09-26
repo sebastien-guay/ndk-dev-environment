@@ -35,3 +35,5 @@ logs
 build
 # source template files
 .gen
+# ignore built wheels
+**/wheels
