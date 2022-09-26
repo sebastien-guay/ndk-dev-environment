@@ -1,2 +1,4 @@
+# set srlinux-ndk to a desired version if needed
+# https://pypi.org/project/srlinux-ndk/
 srlinux-ndk
 pygnmi==0.6.7
