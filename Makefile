@@ -1,8 +1,8 @@
 #################
-# Makefile to automate workflows used to instantiate Go-based dev environment
+# Makefile to automate workflows used to instantiate a Python-based NDK dev environment
 # and perform tasks required throughout the development process
 
-# needs 
+# needs:
 # - docker-ce
 # - containerlab
 #################
