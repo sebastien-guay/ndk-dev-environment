@@ -40,7 +40,7 @@ class BaseAgent(object):
             "unix:///opt/srlinux/var/run/sr_sdk_service_manager:50053"
         )
 
-        # Create  base service that defines agent registration, unregistration,
+        # Create base service that defines agent registration, unregistration,
         # notification subscriptions, and keepalive messages.
         self.sdk_mgr_client = sdk_service_pb2_grpc.SdkMgrServiceStub(self.channel)
         # Create service for handling notifications.
