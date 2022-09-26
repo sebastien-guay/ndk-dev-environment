@@ -107,7 +107,7 @@ restart-app_mgr:
 	cd lab; \	
 	sudo clab exec -t $(LABFILE) --label clab-node-kind=srl --cmd 'sr_cli "tools system app-management application app_mgr reload"'
 
-#Generate the venv used in the rpm
+# generate the venv used in the rpm
 build-venv: wheels
 	cd ${APPNAME}; \
 	docker run --rm -v $$(pwd):/opt/${APPNAME} -w /opt/${APPNAME} --entrypoint 'bash' ghcr.io/nokia/srlinux:latest -c "sudo python3 -m venv .venv && source .venv/bin/activate && pip3 install --no-cache --no-index wheels/pip* && pip3 install --no-cache --no-index wheels/*"
@@ -128,7 +128,7 @@ deploy-test-lab:
 
 destroy-test-lab:
 	cd tests/lab;\
-	sudo clab des -t $(TESTLABFILE) $(CLEANUP)
+	sudo clab des -t $(TESTLABFILE) $(CLEANUP) || true
 
 redeploy-test-lab: destroy-test-lab deploy-test-lab
 
