@@ -10,6 +10,7 @@ from pygnmi.client import gNMIclient
 from ndk import sdk_service_pb2
 from ndk import config_service_pb2
 
+
 class {{ getenv "CLASSNAME" }}(BaseAgent):
     def __init__(self, name):
         super().__init__(name)
@@ -21,62 +22,81 @@ class {{ getenv "CLASSNAME" }}(BaseAgent):
 
     def __exit__(self, exc_type, exc_value, exc_traceback):
         return super().__exit__(exc_type, exc_value, exc_traceback)
-    
+
     def _subscribe(self):
         op = sdk_service_pb2.NotificationRegisterRequest.AddSubscription
         entry = config_service_pb2.ConfigSubscriptionRequest()
-        request = sdk_service_pb2.NotificationRegisterRequest(op=op, stream_id=self.stream_id, config=entry)
+        request = sdk_service_pb2.NotificationRegisterRequest(
+            op=op, stream_id=self.stream_id, config=entry
+        )
 
-        subscription_response = self.sdk_mgr_client.NotificationRegister(request=request, metadata=self.metadata)
-        logging.info(f"Status of configuration subscription response: {subscription_response.status}")
-    
+        subscription_response = self.sdk_mgr_client.NotificationRegister(
+            request=request, metadata=self.metadata
+        )
+        logging.info(
+            f"Status of configuration subscription response: {subscription_response.status}"
+        )
+
     def _get_name_from_configuration(self, obj) -> str:
         data = json.loads(obj.config.data.json)
         name = data["name"]["value"] if "name" in data else ""
         return name
-    
+
     def _set_greeting(self, greeting: str):
         telemetry_data = {"greeting": greeting}
         self._update_telemetry(f".{self.name}", telemetry_data)
 
-    def _handle_notification(self, obj):        
+    def _handle_notification(self, obj):
         logging.info("Process notification")
         if obj.config.key.js_path == f".{self.name}":
             name = self._get_name_from_configuration(obj)
             if name == "":
-               logging.info("{{ getenv "APPNAME" }}/name not configured") 
+                logging.info("greeter/name not configured")
             else:
                 last_booted = self._get_last_booted()
                 greeting = f"Hello {name}, my uptime is {last_booted}"
                 self._set_greeting(greeting)
                 logging.info(greeting)
-                
-    
+
     def _get_last_booted(self) -> str:
-        last_booted = ""        
-        with gNMIclient(target=("unix:///opt/srlinux/var/run/sr_gnmi_server", 57400), username="admin", password="admin", insecure=True) as client:
-            response = client.get(path=['/system/information/last-booted'], encoding='json_ietf')
-            last_booted =  response['notification'][0]['update'][0]['val']
+        last_booted = ""
+        with gNMIclient(
+            target=("unix:///opt/srlinux/var/run/sr_gnmi_server", 57400),
+            username="admin",
+            password="admin",
+            insecure=True,
+        ) as client:
+            response = client.get(
+                path=["/system/information/last-booted"], encoding="json_ietf"
+            )
+            last_booted = response["notification"][0]["update"][0]["val"]
         return last_booted
 
     def run(self):
-        try:                
-            stream_request = sdk_service_pb2.NotificationStreamRequest(stream_id=self.stream_id)
-            stream_response = self.sdk_notification_client.NotificationStream(stream_request, metadata=self.metadata)
+        try:
+            stream_request = sdk_service_pb2.NotificationStreamRequest(
+                stream_id=self.stream_id
+            )
+            stream_response = self.sdk_notification_client.NotificationStream(
+                stream_request, metadata=self.metadata
+            )
             logging.info(f"stream_response 1 \n{stream_response}")
-           
+
             for r in stream_response:
                 logging.info(f"NOTIFICATION:: \n{r.notification}")
                 for obj in r.notification:
-                    if obj.HasField("config") and obj.config.key.js_path == ".commit.end":
+                    if (
+                        obj.HasField("config")
+                        and obj.config.key.js_path == ".commit.end"
+                    ):
                         logging.info("TO DO -commit.end config")
-                    else:                  
+                    else:
                         self._handle_notification(obj)
         except SystemExit as e:
-            logging.info("Handling SystemExit")          
+            logging.info("Handling SystemExit")
         except grpc._channel._Rendezvous as err:
-            logging.error(f'Handling grpc exception: {err}')
+            logging.error(f"Handling grpc exception: {err}")
         except Exception as e:
-            logging.error(f"General exception caught :: {e}")           
+            logging.error(f"General exception caught :: {e}")
         finally:
             logging.info(f"End of notification stream reading")
