@@ -1,19 +1,26 @@
 # Greeter App
 
-This repo provides a base agent, the Greeter app and a Makefile for setting up a python based [NDK](https://learn.srlinux.dev/ndk/intro/) development environment. Read more about the approach at [learn.srlinux.dev](https://learn.srlinux.dev/ndk/guide/env/python/).
+This repo provides a base agent, the Greeter app and a Makefile for setting up a Python-based [NDK](https://learn.srlinux.dev/ndk/intro/) development environment. Read more about the approach at [learn.srlinux.dev](https://learn.srlinux.dev/ndk/guide/env/python/).
 
 ## Features
 
-The Greeter app demonstrates how agent can interact with the whole state and config tree of SR Linux using local gNMI access and the NDK.
+The Greeter app is a demo application that shows the structure of a simple NDK agent and interacts with the state and config tree of an SR Linux container using NDK and gNMI services.
 
-- It subscribes to configuration using the NDK.
-- It retrieves the `name` from the configuration notification and updates its own state with the greeting string `Hello {name}, my uptime is {last_booted}` where `last_booted` is retrieved from the `/system/information/last-booted` state datastore using gnmi.
+Greeter application performs the following high-level steps:
+
+- Registers itself with the NDK service using Manager service.
+- Subscribes to agent's configuration using the Config service.
+- When agent's `name` is committed via configuration path `/greeter name`, the agent receives that event and updates its state using Telemetry service and provides a string `Hello {name}, my uptime is {last_booted}` at `/greeter greeting` path where `last_booted` is retrieved from the`/system/information/last-booted` state datastore using gnmi.
   
 ## Quickstart
 
-You need [conatinerlab](https://containerlab.dev/install/) to be installed. Minimum version is v0.31.0 to have Unix domain socket enabled.
+You need [conatinerlab](https://containerlab.dev/install/) >= v0.31.0.
 
-Clone the `greeter-app-python` branch.
+Clone the `ndk-dev-environment` project and checkout to `python` branch.
+
+```console
+git clone https://github.com/srl-labs/ndk-dev-environment.git && git checkout python
+```
 
 Initialize the NDK project:
 
@@ -45,7 +52,7 @@ Connect to the SR Linux CLI:
 ssh admin@clab-greeter-dev-srl1
 ```
 
-Once connected switch to the candiate mode:
+Once connected switch to the candidate mode:
 
 ```console
 enter candidate private
